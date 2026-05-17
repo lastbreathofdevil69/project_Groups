@@ -303,7 +303,7 @@
       <div class="header-icon" aria-hidden="true"><i class="ti ti-users-group"></i></div>
       <div>
         <h1>Project Group Formation</h1>
-        <p>Groups of 2–4 members &nbsp;&bull;&nbsp; any mix of A &amp; B divisions</p>
+        <p>Groups of 2–4 members &nbsp;&bull;&nbsp; any mix of A &amp; B </p>
       </div>
     </div>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -375,7 +375,7 @@
     <div class="avail-card a-card">
       <div class="avail-title">
         <i class="ti ti-user-circle" aria-hidden="true"></i>
-        Division A
+         A
         <span class="avail-count" id="countA">0</span>
       </div>
       <div class="pill-list" id="availableA"><span class="empty-note">Loading…</span></div>
@@ -383,7 +383,7 @@
     <div class="avail-card b-card">
       <div class="avail-title">
         <i class="ti ti-user-circle" aria-hidden="true"></i>
-        Division B
+         B
         <span class="avail-count" id="countB">0</span>
       </div>
       <div class="pill-list" id="availableB"><span class="empty-note">Loading…</span></div>
@@ -467,7 +467,7 @@
     sel.forEach(n => { const s = students.find(x => x.name === n); if (s?.category === "A") a++; else if (s?.category === "B") b++; });
     if (a > 2 || b > 2) {
       box.className = "vbar bad";
-      box.innerHTML = `<i class="ti ti-alert-circle"></i> Max 2 per division &nbsp;·&nbsp; A: ${a}/2 &nbsp; B: ${b}/2`;
+      box.innerHTML = `<i class="ti ti-alert-circle"></i> Max 2 per  &nbsp;·&nbsp; A: ${a}/2 &nbsp; B: ${b}/2`;
       return false;
     }
     if (sel.length < 2) {
