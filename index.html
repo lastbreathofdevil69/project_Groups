@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Formation System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── LIGHT THEME ─────────────────────────────── */
+    [data-theme="light"] {
+      --bg:        #f5f3ff;
+      --surface:   #ffffff;
+      --surface-2: #ede9fe;
+      --border:    rgba(109,40,217,0.10);
+      --border-md: rgba(109,40,217,0.20);
+      --text:      #1e1b4b;
+      --text-2:    #4c1d95;
+      --text-3:    #7c3aed;
+      --shadow:    0 1px 4px rgba(109,40,217,0.08);
+
+      --p-lavender-bg: #ede9fe; --p-lavender-tx: #5b21b6; --p-lavender-br: #a78bfa;
+      --p-mint-bg:     #d1fae5; --p-mint-tx:     #065f46; --p-mint-br:     #6ee7b7;
+      --p-peach-bg:    #ffe4cc; --p-peach-tx:    #9a3412; --p-peach-br:    #fb923c;
+      --p-sky-bg:      #dbeafe; --p-sky-tx:      #1e40af; --p-sky-br:      #93c5fd;
+      --p-rose-bg:     #fce7f3; --p-rose-tx:     #831843; --p-rose-br:     #f9a8d4;
+      --p-sage-bg:     #dcfce7; --p-sage-tx:     #14532d; --p-sage-br:     #86efac;
+      --p-lemon-bg:    #fef9c3; --p-lemon-tx:    #713f12; --p-lemon-br:    #fde047;
+      --p-lilac-bg:    #f3e8ff; --p-lilac-tx:    #6b21a8; --p-lilac-br:    #d8b4fe;
+      --p-coral-bg:    #fee2e2; --p-coral-tx:    #991b1b; --p-coral-br:    #fca5a5;
+      --p-teal-bg:     #ccfbf1; --p-teal-tx:     #134e4a; --p-teal-br:     #5eead4;
+      --p-pink-bg:     #fdf2f8; --p-pink-tx:     #86198f; --p-pink-br:     #f0abfc;
+      --p-blue-bg:     #e0f2fe; --p-blue-tx:     #075985; --p-blue-br:     #7dd3fc;
+
+      --ok-bg:   var(--p-sky-bg);    --ok-tx:   var(--p-sky-tx);    --ok-br:   var(--p-sky-br);
+      --good-bg: var(--p-sage-bg);   --good-tx: var(--p-sage-tx);   --good-br: var(--p-sage-br);
+      --bad-bg:  var(--p-coral-bg);  --bad-tx:  var(--p-coral-tx);  --bad-br:  var(--p-coral-br);
+      --wait-bg: var(--p-lavender-bg); --wait-tx: var(--p-lavender-tx); --wait-br: var(--p-lavender-br);
+    }
+
+    /* ── DARK THEME ──────────────────────────────── */
+    [data-theme="dark"] {
+      --bg:        #0f0e1a;
+      --surface:   #1a1830;
+      --surface-2: #231f3a;
+      --border:    rgba(167,139,250,0.12);
+      --border-md: rgba(167,139,250,0.22);
+      --text:      #ede9fe;
+      --text-2:    #c4b5fd;
+      --text-3:    #a78bfa;
+      --shadow:    0 2px 8px rgba(0,0,0,0.5);
+
+      --p-lavender-bg: #2e1065; --p-lavender-tx: #ddd6fe; --p-lavender-br: #7c3aed;
+      --p-mint-bg:     #064e3b; --p-mint-tx:     #a7f3d0; --p-mint-br:     #34d399;
+      --p-peach-bg:    #431407; --p-peach-tx:    #fed7aa; --p-peach-br:    #f97316;
+      --p-sky-bg:      #0c2340; --p-sky-tx:      #bae6fd; --p-sky-br:      #38bdf8;
+      --p-rose-bg:     #500724; --p-rose-tx:     #fbcfe8; --p-rose-br:     #ec4899;
+      --p-sage-bg:     #14532d; --p-sage-tx:     #bbf7d0; --p-sage-br:     #4ade80;
+      --p-lemon-bg:    #422006; --p-lemon-tx:    #fef08a; --p-lemon-br:    #facc15;
+      --p-lilac-bg:    #3b0764; --p-lilac-tx:    #e9d5ff; --p-lilac-br:    #c084fc;
+      --p-coral-bg:    #450a0a; --p-coral-tx:    #fecaca; --p-coral-br:    #f87171;
+      --p-teal-bg:     #042f2e; --p-teal-tx:     #99f6e4; --p-teal-br:     #2dd4bf;
+      --p-pink-bg:     #4a044e; --p-pink-tx:     #fae8ff; --p-pink-br:     #e879f9;
+      --p-blue-bg:     #082f49; --p-blue-tx:     #bae6fd; --p-blue-br:     #38bdf8;
+
+      --ok-bg:   var(--p-sky-bg);    --ok-tx:   var(--p-sky-tx);    --ok-br:   var(--p-sky-br);
+      --good-bg: var(--p-sage-bg);   --good-tx: var(--p-sage-tx);   --good-br: var(--p-sage-br);
+      --bad-bg:  var(--p-coral-bg);  --bad-tx:  var(--p-coral-tx);  --bad-br:  var(--p-coral-br);
+      --wait-bg: var(--p-lavender-bg); --wait-tx: var(--p-lavender-tx); --wait-br: var(--p-lavender-br);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px; line-height: 1.6;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+      transition: background 0.25s, color 0.25s;
+    }
+    .page { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+    /* HEADER */
+    .header {
+      background: var(--p-lavender-bg);
+      border: 1px solid var(--p-lavender-br);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+    .header-icon {
+      width: 46px; height: 46px; flex-shrink: 0;
+      background: var(--p-lavender-tx);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header-icon i { font-size: 22px; color: var(--p-lavender-bg); }
+    .header h1 { font-size: 19px; font-weight: 600; color: var(--p-lavender-tx); }
+    .header p  { font-size: 13px; color: var(--p-lavender-tx); opacity: 0.72; margin-top: 1px; }
+    .theme-btn {
+      flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border-md);
+      border-radius: 10px; padding: 0.45rem 0.9rem;
+      font-size: 13px; font-weight: 500; color: var(--text-3);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s; font-family: inherit;
+    }
+    .theme-btn:hover { background: var(--surface-2); }
+
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+    @media(max-width:640px){ .stats { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:340px){ .stats { grid-template-columns: 1fr; } }
+    .stat-card {
+      border-radius: 14px; padding: 1rem 1.2rem;
+      border: 1px solid; transition: transform 0.15s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; opacity: 0.8; }
+    .stat-value { font-size: 34px; font-weight: 700; margin-top: 4px; line-height: 1; }
+    .sc-total    { background: var(--p-lavender-bg); border-color: var(--p-lavender-br); color: var(--p-lavender-tx); }
+    .sc-complete { background: var(--p-sage-bg);     border-color: var(--p-sage-br);     color: var(--p-sage-tx); }
+    .sc-partial  { background: var(--p-lemon-bg);    border-color: var(--p-lemon-br);    color: var(--p-lemon-tx); }
+    .sc-assigned { background: var(--p-sky-bg);      border-color: var(--p-sky-br);      color: var(--p-sky-tx); }
+
+    /* FORM */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border-md);
+      border-radius: 18px; padding: 1.4rem 1.5rem; box-shadow: var(--shadow);
+    }
+    .form-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 1.2rem;
+    }
+    .form-title { font-size: 16px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .form-title i { font-size: 18px; color: var(--text-3); }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; border-radius: 10px; padding: 0.5rem 1.1rem;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: opacity 0.15s, transform 0.1s; white-space: nowrap; border: 1px solid;
+    }
+    .btn:hover { opacity: 0.84; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary     { background: var(--p-lavender-bg); color: var(--p-lavender-tx); border-color: var(--p-lavender-br); }
+    .btn-save-edit   { background: var(--p-mint-bg);     color: var(--p-mint-tx);     border-color: var(--p-mint-br); }
+    .btn-cancel      { background: var(--surface-2);     color: var(--text-2);         border-color: var(--border-md); }
+    .btn-edit        { background: var(--p-sky-bg);      color: var(--p-sky-tx);       border-color: var(--p-sky-br); }
+    .btn-delete      { background: var(--p-coral-bg);    color: var(--p-coral-tx);     border-color: var(--p-coral-br); }
+    .hidden { display: none !important; }
+
+    /* FIELDS */
+    .member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px,1fr)); gap: 10px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-2); margin-bottom: 5px;
+    }
+    .field label .opt { font-weight: 400; text-transform: none; opacity: 0.55; margin-left: 4px; }
+    .field label .req { color: var(--p-rose-tx); margin-left: 2px; }
+    select {
+      font-family: inherit; font-size: 14px; width: 100%;
+      padding: 0.55rem 2rem 0.55rem 0.85rem;
+      border: 1px solid var(--border-md); border-radius: 10px;
+      background: var(--surface-2); color: var(--text);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    select:focus { outline: none; border-color: var(--p-lavender-tx); box-shadow: 0 0 0 3px var(--p-lavender-bg); }
+
+    /* VALIDATION */
+    .vbar {
+      margin-top: 1rem; padding: 0.65rem 1rem;
+      border-radius: 10px; border: 1px solid;
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .vbar.waiting { background: var(--wait-bg); color: var(--wait-tx); border-color: var(--wait-br); }
+    .vbar.ok      { background: var(--ok-bg);   color: var(--ok-tx);   border-color: var(--ok-br); }
+    .vbar.good    { background: var(--good-bg);  color: var(--good-tx); border-color: var(--good-br); }
+    .vbar.bad     { background: var(--bad-bg);   color: var(--bad-tx);  border-color: var(--bad-br); }
+
+    /* AVAILABLE */
+    .avail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:480px){ .avail-row { grid-template-columns: 1fr; } }
+    .avail-card { border-radius: 14px; padding: 1.1rem 1.2rem; border: 1px solid; }
+    .avail-card.a-card { background: var(--p-mint-bg); border-color: var(--p-mint-br); }
+    .avail-card.b-card { background: var(--p-sky-bg);  border-color: var(--p-sky-br); }
+    .avail-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .a-card .avail-title { color: var(--p-mint-tx); }
+    .b-card .avail-title { color: var(--p-sky-tx); }
+    .avail-count {
+      font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px;
+    }
+    .a-card .avail-count { background: var(--p-mint-tx); color: var(--p-mint-bg); }
+    .b-card .avail-count { background: var(--p-sky-tx);  color: var(--p-sky-bg); }
+    .pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      font-size: 12px; font-weight: 500; padding: 3px 11px;
+      border-radius: 20px; border: 1px solid; cursor: default;
+      transition: transform 0.1s; background: var(--surface);
+    }
+    .pill:hover { transform: scale(1.05); }
+    .pill.a { color: var(--p-mint-tx); border-color: var(--p-mint-br); }
+    .pill.b { color: var(--p-sky-tx);  border-color: var(--p-sky-br); }
+    .empty-note { font-size: 12px; opacity: 0.6; font-style: italic; }
+
+    /* TABLE */
+    .groups-card {
+      background: var(--surface); border: 1px solid var(--border-md);
+      border-radius: 18px; overflow: hidden; box-shadow: var(--shadow);
+    }
+    .groups-header {
+      padding: 1rem 1.4rem; border-bottom: 1px solid var(--border-md);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: var(--p-lilac-bg);
+    }
+    .groups-header-left { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--p-lilac-tx); }
+    .groups-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--p-lilac-tx); color: var(--p-lilac-bg); }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
+    thead tr { background: var(--surface-2); }
+    th { padding: 0.65rem 1rem; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+    td { padding: 0.8rem 1rem; border-top: 1px solid var(--border); vertical-align: middle; }
+    tbody tr { transition: background 0.12s; }
+    tbody tr:hover { background: var(--surface-2); }
+
+    /* colored row left accent */
+    tbody tr:nth-child(6n+1) { --row-acc: var(--p-lavender-br); }
+    tbody tr:nth-child(6n+2) { --row-acc: var(--p-mint-br); }
+    tbody tr:nth-child(6n+3) { --row-acc: var(--p-peach-br); }
+    tbody tr:nth-child(6n+4) { --row-acc: var(--p-rose-br); }
+    tbody tr:nth-child(6n+5) { --row-acc: var(--p-sky-br); }
+    tbody tr:nth-child(6n+0) { --row-acc: var(--p-teal-br); }
+    tbody tr td:first-child { border-left: 3px solid var(--row-acc); padding-left: 14px; }
+
+    /* group number chips — cycle 6 pastels */
+    .gnum {
+      font-weight: 700; font-size: 13px;
+      width: 30px; height: 30px; border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .gc-1 { background: var(--p-lavender-bg); color: var(--p-lavender-tx); }
+    .gc-2 { background: var(--p-mint-bg);     color: var(--p-mint-tx); }
+    .gc-3 { background: var(--p-peach-bg);    color: var(--p-peach-tx); }
+    .gc-4 { background: var(--p-rose-bg);     color: var(--p-rose-tx); }
+    .gc-5 { background: var(--p-sky-bg);      color: var(--p-sky-tx); }
+    .gc-0 { background: var(--p-teal-bg);     color: var(--p-teal-tx); }
+
+    .mtag-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mtag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; border: 1px solid; }
+    .mtag-a { background: var(--p-mint-bg); color: var(--p-mint-tx); border-color: var(--p-mint-br); }
+    .mtag-b { background: var(--p-sky-bg);  color: var(--p-sky-tx);  border-color: var(--p-sky-br); }
+
+    .badge { font-size: 11px; font-weight: 600; padding: 4px 11px; border-radius: 20px; border: 1px solid; display: inline-flex; align-items: center; gap: 5px; }
+    .badge.complete   { background: var(--p-sage-bg);  color: var(--p-sage-tx);  border-color: var(--p-sage-br); }
+    .badge.incomplete { background: var(--p-lemon-bg); color: var(--p-lemon-tx); border-color: var(--p-lemon-br); }
+
+    .action-row { display: flex; gap: 6px; }
+    .action-row .btn { padding: 0.3rem 0.75rem; font-size: 11px; }
+
+    .empty-state { padding: 3rem 1rem; text-align: center; color: var(--text-3); }
+    .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--p-lavender-br); }
+    .empty-state p { font-size: 13px; }
+
+    /* LOADER */
+    .loader { height: 3px; border-radius: 3px; background: var(--p-lavender-bg); overflow: hidden; transition: opacity 0.3s; }
+    .loader.hidden { opacity: 0; pointer-events: none; }
+    .loader::after {
+      content: ''; display: block; width: 35%; height: 100%;
+      background: var(--p-lavender-tx);
+      animation: shimmer 1s ease-in-out infinite;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-200%); } 100% { transform: translateX(500%); } }
+
+    @media(max-width:600px){
+      body { padding: 1rem 0.75rem 2rem; }
+      .header { border-radius: 14px; padding: 1rem 1.1rem; }
+      .form-card, .groups-card { border-radius: 14px; }
+      .avail-card { border-radius: 12px; }
+      .member-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:380px){ .member-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon" aria-hidden="true"><i class="ti ti-users-group"></i></div>
+      <div>
+        <h1>Project Group Formation</h1>
+        <p>Groups of 2–4 members &nbsp;&bull;&nbsp; any mix of A &amp; B divisions</p>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+      <i class="ti ti-moon" id="themeIcon"></i><span id="themeLabel">Dark</span>
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card sc-total">
+      <div class="stat-label"><i class="ti ti-layout-grid"></i> Total groups</div>
+      <div class="stat-value" id="totalGroups">0</div>
+    </div>
+    <div class="stat-card sc-complete">
+      <div class="stat-label"><i class="ti ti-circle-check"></i> Complete</div>
+      <div class="stat-value" id="validGroups">0</div>
+    </div>
+    <div class="stat-card sc-partial">
+      <div class="stat-label"><i class="ti ti-clock"></i> Incomplete</div>
+      <div class="stat-value" id="invalidGroups">0</div>
+    </div>
+    <div class="stat-card sc-assigned">
+      <div class="stat-label"><i class="ti ti-user-check"></i> Assigned</div>
+      <div class="stat-value" id="assignedStudents">0</div>
+    </div>
+  </div>
+
+  <div class="loader hidden" id="loader"></div>
+
+  <!-- Form -->
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-title"><i class="ti ti-plus-circle" aria-hidden="true"></i><span id="formTitle">Create group</span></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveBtn" onclick="saveGroup()">
+          <i class="ti ti-device-floppy" aria-hidden="true"></i><span id="saveBtnLabel">Save group</span>
+        </button>
+        <button class="btn btn-cancel hidden" id="cancelBtn" onclick="cancelEdit()">
+          <i class="ti ti-x" aria-hidden="true"></i> Cancel
+        </button>
+      </div>
+    </div>
+    <div class="member-grid">
+      <div class="field">
+        <label>Member 1<span class="req">*</span></label>
+        <select id="member1" class="memberSelect"><option value="">— select —</option></select>
+      </div>
+      <div class="field">
+        <label>Member 2<span class="req">*</span></label>
+        <select id="member2" class="memberSelect"><option value="">— select —</option></select>
+      </div>
+      <div class="field">
+        <label>Member 3<span class="opt">optional</span></label>
+        <select id="member3" class="memberSelect"><option value="">— select —</option></select>
+      </div>
+      <div class="field">
+        <label>Member 4<span class="opt">optional</span></label>
+        <select id="member4" class="memberSelect"><option value="">— select —</option></select>
+      </div>
+    </div>
+    <div class="vbar waiting" id="vbar">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      Select at least 2 members to continue
+    </div>
+  </div>
+
+  <!-- Available students -->
+  <div class="avail-row">
+    <div class="avail-card a-card">
+      <div class="avail-title">
+        <i class="ti ti-user-circle" aria-hidden="true"></i>
+        Division A
+        <span class="avail-count" id="countA">0</span>
+      </div>
+      <div class="pill-list" id="availableA"><span class="empty-note">Loading…</span></div>
+    </div>
+    <div class="avail-card b-card">
+      <div class="avail-title">
+        <i class="ti ti-user-circle" aria-hidden="true"></i>
+        Division B
+        <span class="avail-count" id="countB">0</span>
+      </div>
+      <div class="pill-list" id="availableB"><span class="empty-note">Loading…</span></div>
+    </div>
+  </div>
+
+  <!-- Groups table -->
+  <div class="groups-card">
+    <div class="groups-header">
+      <div class="groups-header-left"><i class="ti ti-table" aria-hidden="true"></i> Created groups</div>
+      <span class="groups-badge" id="groupsBadge">0</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Members</th><th>A</th><th>B</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="groupsTable">
+          <tr><td colspan="6"><div class="empty-state">
+            <i class="ti ti-mood-happy" aria-hidden="true"></i>
+            <p>No groups yet — create your first group above</p>
+          </div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<script>
+  /* THEME */
+  const saved = localStorage.getItem("gfs-theme") || "light";
+  applyTheme(saved);
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    localStorage.setItem("gfs-theme", t);
+    const icon = document.getElementById("themeIcon");
+    const lbl  = document.getElementById("themeLabel");
+    if (!icon) return;
+    if (t === "dark") { icon.className = "ti ti-sun";  lbl.textContent = "Light"; }
+    else              { icon.className = "ti ti-moon"; lbl.textContent = "Dark"; }
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  }
+
+  /* DATA */
+  const API_URL = "https://script.google.com/macros/s/AKfycbx4FUGsZwSUAI_VRkoJX5UYdHCT3UmWvDfRgUhYoVvnTRzOeT_f5h8ZKmkzM2-iFBKDKA/exec";
+  let students = [], groups = [], assignedStudents = new Set(), editingGroupIndex = -1;
+  const selects = Array.from(document.querySelectorAll(".memberSelect"));
+
+  function setLoading(on) { document.getElementById("loader").classList.toggle("hidden", !on); }
+
+  function populateDropdowns(editingMembers = []) {
+    selects.forEach(sel => {
+      const cv = sel.value;
+      sel.innerHTML = '<option value="">— select —</option>';
+      students.forEach(s => {
+        if (!assignedStudents.has(s.name) || s.name === cv || editingMembers.includes(s.name)) {
+          const o = document.createElement("option");
+          o.value = s.name;
+          o.textContent = `${s.name} (${s.category})`;
+          sel.appendChild(o);
+        }
+      });
+      sel.value = cv;
+    });
+    validateSelection(); renderAvailableStudents();
+  }
+
+  function validateSelection() {
+    const sel = selects.map(s => s.value).filter(Boolean);
+    const box = document.getElementById("vbar");
+    if (sel.filter((x, i) => sel.indexOf(x) !== i).length) {
+      box.className = "vbar bad";
+      box.innerHTML = `<i class="ti ti-alert-circle"></i> Duplicate students selected`;
+      return false;
+    }
+    let a = 0, b = 0;
+    sel.forEach(n => { const s = students.find(x => x.name === n); if (s?.category === "A") a++; else if (s?.category === "B") b++; });
+    if (a > 2 || b > 2) {
+      box.className = "vbar bad";
+      box.innerHTML = `<i class="ti ti-alert-circle"></i> Max 2 per division &nbsp;·&nbsp; A: ${a}/2 &nbsp; B: ${b}/2`;
+      return false;
+    }
+    if (sel.length < 2) {
+      box.className = "vbar waiting";
+      box.innerHTML = `<i class="ti ti-info-circle"></i> Need at least 2 members &nbsp;·&nbsp; A: ${a} &nbsp; B: ${b}`;
+      return false;
+    }
+    if (sel.length === 4 && a === 2 && b === 2) {
+      box.className = "vbar good";
+      box.innerHTML = `<i class="ti ti-circle-check"></i> Complete — 2A + 2B ready to save`;
+      return true;
+    }
+    box.className = "vbar ok";
+    box.innerHTML = `<i class="ti ti-check"></i> ${sel.length}/4 members &nbsp;·&nbsp; A: ${a} &nbsp; B: ${b} — needs 2A + 2B for complete`;
+    return true;
+  }
+  selects.forEach(s => s.addEventListener("change", validateSelection));
+
+  async function saveGroup() {
+    const members = selects.map(s => s.value).filter(Boolean);
+    if (members.length < 2) { alert("Select at least 2 members."); return; }
+    if (new Set(members).size !== members.length) { alert("Duplicate members selected."); return; }
+    if (!validateSelection()) { alert("Invalid group composition."); return; }
+    let a = 0, b = 0;
+    members.forEach(n => { const s = students.find(x => x.name === n); if (s?.category === "A") a++; else b++; });
+    const isComplete = members.length === 4 && a === 2 && b === 2;
+    setLoading(true);
+    if (editingGroupIndex >= 0) {
+      const group = groups[editingGroupIndex];
+      try {
+        const p = new URLSearchParams({ action:"editGroup", groupNumber: group.groupNumber.toString(), members: members.join(","), _t: Date.now() });
+        const data = await fetch(API_URL + "?" + p).then(r => r.json());
+        if (data.students && !data.message) { alert("Backend outdated."); setLoading(false); return; }
+        if (!data.success) { alert("Edit failed: " + data.message); setLoading(false); return; }
+      } catch { alert("Network error."); setLoading(false); return; }
+      group.members.forEach(n => assignedStudents.delete(n));
+      Object.assign(group, { members, aCount: a, bCount: b, status: isComplete ? "Complete" : "Incomplete" });
+      members.forEach(n => assignedStudents.add(n));
+      cancelEdit();
+    } else {
+      const newGroup = { groupNumber: groups.length + 1, members, aCount: a, bCount: b, status: isComplete ? "Complete" : "Incomplete" };
+      try {
+        const p = new URLSearchParams({ action:"createGroup", members: members.join(","), _t: Date.now() });
+        const data = await fetch(API_URL + "?" + p).then(r => r.json());
+        if (!data.success) { alert("Error: " + data.message); setLoading(false); return; }
+        newGroup.groupNumber = data.groupNumber || newGroup.groupNumber;
+      } catch { alert("Network error."); setLoading(false); return; }
+      groups.push(newGroup);
+      members.forEach(n => assignedStudents.add(n));
+      selects.forEach(s => s.value = ""); validateSelection();
+    }
+    setLoading(false); renderGroups(); updateStats(); populateDropdowns();
+  }
+
+  function editGroup(index) {
+    const group = groups[index];
+    editingGroupIndex = index;
+    document.getElementById("formTitle").textContent = "Edit group #" + group.groupNumber;
+    document.getElementById("saveBtnLabel").textContent = "Update group";
+    document.getElementById("saveBtn").className = "btn btn-save-edit";
+    document.getElementById("cancelBtn").classList.remove("hidden");
+    populateDropdowns(group.members);
+    selects.forEach((s, i) => s.value = group.members[i] || "");
+    validateSelection();
+    document.querySelector(".form-card").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function cancelEdit() {
+    editingGroupIndex = -1;
+    document.getElementById("formTitle").textContent = "Create group";
+    document.getElementById("saveBtnLabel").textContent = "Save group";
+    document.getElementById("saveBtn").className = "btn btn-primary";
+    document.getElementById("cancelBtn").classList.add("hidden");
+    selects.forEach(s => s.value = "");
+    populateDropdowns(); validateSelection();
+  }
+
+  async function deleteGroup(index) {
+    if (!confirm(`Delete Group #${groups[index].groupNumber}?`)) return;
+    setLoading(true);
+    const group = groups[index];
+    try {
+      const p = new URLSearchParams({ action:"deleteGroup", groupNumber: group.groupNumber.toString(), _t: Date.now() });
+      const data = await fetch(API_URL + "?" + p).then(r => r.json());
+      if (data.students && !data.message) { alert("Backend outdated."); setLoading(false); return; }
+      if (!data.success) { alert("Delete failed: " + data.message); setLoading(false); return; }
+    } catch { alert("Network error."); setLoading(false); return; }
+    group.members.forEach(n => assignedStudents.delete(n));
+    groups.splice(index, 1);
+    if (editingGroupIndex === index) cancelEdit();
+    else if (editingGroupIndex > index) editingGroupIndex--;
+    setLoading(false); renderGroups(); updateStats(); populateDropdowns();
+  }
+
+  const gcCls = ["gc-0","gc-1","gc-2","gc-3","gc-4","gc-5"];
+
+  function renderGroups() {
+    const tbody = document.getElementById("groupsTable");
+    document.getElementById("groupsBadge").textContent = groups.length;
+    tbody.innerHTML = "";
+    if (!groups.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="ti ti-mood-happy"></i><p>No groups yet — create your first group above</p></div></td></tr>`;
+      return;
+    }
+    groups.forEach((group, index) => {
+      const tr = document.createElement("tr");
+      const gc = gcCls[group.groupNumber % 6];
+      const badge = group.status === "Complete"
+        ? `<span class="badge complete"><i class="ti ti-circle-check"></i>Complete</span>`
+        : `<span class="badge incomplete"><i class="ti ti-clock"></i>Incomplete</span>`;
+      const tags = group.members.map(n => {
+        const s = students.find(x => x.name === n);
+        return `<span class="mtag ${s?.category === "A" ? "mtag-a" : "mtag-b"}">${n}</span>`;
+      }).join("");
+      tr.innerHTML = `
+        <td><span class="gnum ${gc}">${group.groupNumber}</span></td>
+        <td><div class="mtag-wrap">${tags}</div></td>
+        <td><span class="mtag mtag-a">${group.aCount}</span></td>
+        <td><span class="mtag mtag-b">${group.bCount}</span></td>
+        <td>${badge}</td>
+        <td><div class="action-row">
+          <button class="btn btn-edit" onclick="editGroup(${index})"><i class="ti ti-edit"></i>Edit</button>
+          <button class="btn btn-delete" onclick="deleteGroup(${index})"><i class="ti ti-trash"></i>Delete</button>
+        </div></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateStats() {
+    const complete = groups.filter(g => g.status === "Complete").length;
+    document.getElementById("totalGroups").textContent = groups.length;
+    document.getElementById("validGroups").textContent = complete;
+    document.getElementById("invalidGroups").textContent = groups.length - complete;
+    document.getElementById("assignedStudents").textContent = assignedStudents.size;
+  }
+
+  function renderAvailableStudents() {
+    const lA = document.getElementById("availableA"), lB = document.getElementById("availableB");
+    lA.innerHTML = ""; lB.innerHTML = "";
+    let cA = 0, cB = 0;
+    students.forEach(s => {
+      if (assignedStudents.has(s.name)) return;
+      const pill = document.createElement("span");
+      pill.className = "pill " + s.category.toLowerCase();
+      pill.textContent = s.name;
+      if (s.category === "A") { lA.appendChild(pill); cA++; } else { lB.appendChild(pill); cB++; }
+    });
+    if (!cA) lA.innerHTML = `<span class="empty-note">All assigned</span>`;
+    if (!cB) lB.innerHTML = `<span class="empty-note">All assigned</span>`;
+    document.getElementById("countA").textContent = cA;
+    document.getElementById("countB").textContent = cB;
+  }
+
+  async function fetchDataFromSheets() {
+    setLoading(true);
+    try {
+      const data = await fetch(API_URL + "?_t=" + Date.now()).then(r => r.json());
+      if (!data.success) { console.error("API Error:", data.message); setLoading(false); return; }
+      students = (data.students || []).map(s => ({
+        name: s.Name||s.name||"", category: s.Category||s.category||"",
+        assigned: String(s.Assigned||s.assigned||"false").toLowerCase() === "true",
+      }));
+      groups = (data.groups || []).map((g, i) => {
+        const members = (g.members || [g.Member1||g["Member 1"]||"",g.Member2||g["Member 2"]||"",g.Member3||g["Member 3"]||"",g.Member4||g["Member 4"]||""]).filter(Boolean);
+        const aCount = parseInt(g.ACount||g["A Count"]||g.aCount||0,10);
+        const bCount = parseInt(g.BCount||g["B Count"]||g.bCount||0,10);
+        const status = g.Status||g.status||(members.length===4&&aCount===2&&bCount===2?"Complete":"Incomplete");
+        return { groupNumber: parseInt(g.GroupNumber||g["Group Number"]||g.groupNumber||(i+1),10), members, aCount, bCount, status };
+      });
+      assignedStudents.clear();
+      students.forEach(s => { if (s.assigned) assignedStudents.add(s.name); });
+      groups.forEach(g => g.members.forEach(m => assignedStudents.add(m)));
+      populateDropdowns(); renderGroups(); updateStats();
+    } catch (err) { console.error("Fetch failed:", err); }
+    setLoading(false);
+  }
+  fetchDataFromSheets();
+</script>
+</body>
+</html>
