@@ -497,14 +497,18 @@
     setLoading(true);
     if (editingGroupIndex >= 0) {
       const group = groups[editingGroupIndex];
+      const oldMembers = [...group.members]; // Store old members
       try {
         const p = new URLSearchParams({ action:"editGroup", groupNumber: group.groupNumber.toString(), members: members.join(","), _t: Date.now() });
         const data = await fetch(API_URL + "?" + p).then(r => r.json());
         if (data.students && !data.message) { alert("Backend outdated."); setLoading(false); return; }
         if (!data.success) { alert("Edit failed: " + data.message); setLoading(false); return; }
       } catch { alert("Network error."); setLoading(false); return; }
-      group.members.forEach(n => assignedStudents.delete(n));
+      // Update local state: remove old members from assigned set
+      oldMembers.forEach(n => assignedStudents.delete(n));
+      // Update group object
       Object.assign(group, { members, aCount: a, bCount: b, status: isComplete ? "Complete" : "Incomplete" });
+      // Add new members to assigned set
       members.forEach(n => assignedStudents.add(n));
       cancelEdit();
     } else {
@@ -627,8 +631,9 @@
       const data = await fetch(API_URL + "?_t=" + Date.now()).then(r => r.json());
       if (!data.success) { console.error("API Error:", data.message); setLoading(false); return; }
       students = (data.students || []).map(s => ({
-        name: s.Name||s.name||"", category: s.Category||s.category||"",
-        assigned: String(s.Assigned||s.assigned||"false").toLowerCase() === "true",
+        name: s.Name||s.name||"", 
+        category: s.Category||s.category||"",
+        assigned: s.Assigned === true || s.Assigned === "TRUE" || String(s.Assigned||"false").toLowerCase() === "true"
       }));
       groups = (data.groups || []).map((g, i) => {
         const members = (g.members || [g.Member1||g["Member 1"]||"",g.Member2||g["Member 2"]||"",g.Member3||g["Member 3"]||"",g.Member4||g["Member 4"]||""]).filter(Boolean);
