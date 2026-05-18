@@ -72,7 +72,7 @@ function handleCreateGroup(e) {
 
   // Validate: at least 2 members, max 4
   if (memberNames.length < 2 || memberNames.length > 4) {
-    throw new Error("Group must contain 2 to 4 members. Found: " + memberNames.length);
+    throw new Error("A group must have between 2 and 4 members. You selected " + memberNames.length + " member(s). Please adjust your selection.");
   }
 
   // Prevent Duplicate Members
@@ -81,7 +81,7 @@ function handleCreateGroup(e) {
     unique[memberNames[u]] = true;
   }
   if (Object.keys(unique).length !== memberNames.length) {
-    throw new Error("Duplicate members selected in same group.");
+    throw new Error("You cannot add the same student to a group multiple times. Please select different students.");
   }
 
   // Fetch Student Data
@@ -97,7 +97,7 @@ function handleCreateGroup(e) {
   for (var n = 0; n < memberNames.length; n++) {
     var student = studentMap[memberNames[n]];
     if (!student) {
-      throw new Error("Student not found: " + memberNames[n]);
+      throw new Error("Student '" + memberNames[n] + "' was not found in the system. Please refresh the page and try again.");
     }
     // Handle boolean, string "TRUE", or string "true"
     var assignedValue = student.Assigned;
@@ -105,21 +105,31 @@ function handleCreateGroup(e) {
                      String(assignedValue).toLowerCase() === "true");
     
     if (isAssigned) {
-      throw new Error(student.Name + " is already assigned to another group.");
+      throw new Error("'" + student.Name + "' is already assigned to another group. Please select a different student.");
     }
     if (student.Category === "A") countA++;
     if (student.Category === "B") countB++;
   }
 
   if (countA > 2 || countB > 2) {
-    throw new Error("Max 2 members per category allowed. Found: " + countA + "A and " + countB + "B.");
+    throw new Error("Each group can have a maximum of 2 students per category. You selected " + countA + " from Category A and " + countB + " from Category B. Please adjust your selection.");
   }
 
   // Determine status (2A + 2B = Complete, anything else = Incomplete)
   var status = (memberNames.length === 4 && countA === 2 && countB === 2) ? "Complete" : "Incomplete";
 
-  // Generate Group Number
-  var nextGroupNumber = Math.max(groupSheet.getLastRow(), 1);
+  // Generate Group Number - find highest existing number + 1
+  var groupData = groupSheet.getDataRange().getValues();
+  var maxGroupNumber = 0;
+  for (var i = 1; i < groupData.length; i++) {
+    var cellValue = String(groupData[i][0] || "");
+    var match = cellValue.match(/\d+/);
+    var num = match ? parseInt(match[0], 10) : 0;
+    if (!isNaN(num) && num > maxGroupNumber) {
+      maxGroupNumber = num;
+    }
+  }
+  var nextGroupNumber = maxGroupNumber + 1;
 
   // Save Group (pad empty slots for members < 4)
   groupSheet.appendRow([
@@ -159,11 +169,11 @@ function handleEditGroup(e) {
   var newMembers = membersParam.split(",").filter(function(n) { return n !== ""; });
 
   if (!groupNumber) {
-    throw new Error("Invalid group number.");
+    throw new Error("Invalid group number. Please refresh the page and try again.");
   }
 
   if (newMembers.length < 2 || newMembers.length > 4) {
-    throw new Error("Group must contain 2 to 4 members. Found: " + newMembers.length);
+    throw new Error("A group must have between 2 and 4 members. You selected " + newMembers.length + " member(s). Please adjust your selection.");
   }
 
   // Prevent duplicates
@@ -172,7 +182,7 @@ function handleEditGroup(e) {
     unique[newMembers[u]] = true;
   }
   if (Object.keys(unique).length !== newMembers.length) {
-    throw new Error("Duplicate members selected.");
+    throw new Error("You cannot add the same student to a group multiple times. Please select different students.");
   }
 
   // Find existing group row
@@ -193,7 +203,7 @@ function handleEditGroup(e) {
   }
 
   if (rowIndex === -1) {
-    throw new Error("Group not found: " + groupNumber);
+    throw new Error("Group #" + groupNumber + " was not found. It may have been deleted. Please refresh the page.");
   }
 
   // FIRST: Temporarily un-assign old members to allow validation
@@ -214,7 +224,7 @@ function handleEditGroup(e) {
   for (var n = 0; n < newMembers.length; n++) {
     var student = studentMap[newMembers[n]];
     if (!student) {
-      validationError = "Student not found: " + newMembers[n];
+      validationError = "Student '" + newMembers[n] + "' was not found in the system. Please refresh the page and try again.";
       break;
     }
     // Check if assigned (now all old members are unassigned, so this correctly checks OTHER groups)
@@ -223,7 +233,7 @@ function handleEditGroup(e) {
                      String(assignedValue).toLowerCase() === "true");
     
     if (isAssigned) {
-      validationError = student.Name + " is already assigned to another group.";
+      validationError = "'" + student.Name + "' is already assigned to another group. Please select a different student.";
       break;
     }
     if (student.Category === "A") countA++;
@@ -231,7 +241,7 @@ function handleEditGroup(e) {
   }
 
   if (!validationError && (countA > 2 || countB > 2)) {
-    validationError = "Max 2 members per category allowed. Found: " + countA + "A and " + countB + "B.";
+    validationError = "Each group can have a maximum of 2 students per category. You selected " + countA + " from Category A and " + countB + " from Category B. Please adjust your selection.";
   }
 
   // If validation failed, restore old assignments and throw error
@@ -273,7 +283,7 @@ function handleDeleteGroup(e) {
 
   var groupNumber = parseInt(e.parameter.groupNumber, 10);
   if (!groupNumber) {
-    throw new Error("Invalid group number.");
+    throw new Error("Invalid group number. Please refresh the page and try again.");
   }
 
   var groupData = groupSheet.getDataRange().getValues();
@@ -293,7 +303,7 @@ function handleDeleteGroup(e) {
   }
 
   if (rowToDelete === -1) {
-    throw new Error("Group not found: " + groupNumber);
+    throw new Error("Group #" + groupNumber + " was not found. It may have already been deleted. Please refresh the page.");
   }
 
   groupSheet.deleteRow(rowToDelete);

@@ -274,7 +274,27 @@
     .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--p-lavender-br); }
     .empty-state p { font-size: 13px; }
 
-    /* LOADER */
+    /* TOAST NOTIFICATIONS */
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 400px; }
+    .toast {
+      background: var(--surface); border: 1px solid; border-radius: 12px;
+      padding: 1rem 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 12px;
+      animation: slideIn 0.3s ease-out;
+      min-width: 300px;
+    }
+    .toast.success { border-color: var(--p-sage-br); background: var(--p-sage-bg); color: var(--p-sage-tx); }
+    .toast.error { border-color: var(--p-coral-br); background: var(--p-coral-bg); color: var(--p-coral-tx); }
+    .toast.info { border-color: var(--p-sky-br); background: var(--p-sky-bg); color: var(--p-sky-tx); }
+    .toast.warning { border-color: var(--p-lemon-br); background: var(--p-lemon-bg); color: var(--p-lemon-tx); }
+    .toast-icon { font-size: 20px; flex-shrink: 0; }
+    .toast-content { flex: 1; font-size: 13px; font-weight: 500; }
+    .toast-close { cursor: pointer; font-size: 18px; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
+    .toast-close:hover { opacity: 1; }
+    @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+    .toast.removing { animation: slideOut 0.3s ease-out forwards; }
+
     .loader { height: 3px; border-radius: 3px; background: var(--p-lavender-bg); overflow: hidden; transition: opacity 0.3s; }
     .loader.hidden { opacity: 0; pointer-events: none; }
     .loader::after {
@@ -283,6 +303,35 @@
       animation: shimmer 1s ease-in-out infinite;
     }
     @keyframes shimmer { 0% { transform: translateX(-200%); } 100% { transform: translateX(500%); } }
+
+    /* AUTO-REFRESH INDICATOR */
+    .refresh-indicator {
+      position: fixed; bottom: 20px; left: 20px; z-index: 9998;
+      background: var(--surface); border: 1px solid var(--border-md);
+      border-radius: 10px; padding: 0.5rem 0.9rem;
+      font-size: 12px; color: var(--text-3);
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0.7; transition: opacity 0.2s;
+    }
+    .refresh-indicator:hover { opacity: 1; }
+    .refresh-indicator.active .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--p-sage-tx);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .refresh-indicator.paused .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--p-lemon-tx);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
 
     @media(max-width:600px){
       body { padding: 1rem 0.75rem 2rem; }
@@ -308,6 +357,9 @@
     </div>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
       <i class="ti ti-moon" id="themeIcon"></i><span id="themeLabel">Dark</span>
+    </button>
+    <button class="theme-btn" onclick="manualRefresh()" aria-label="Refresh data" title="Refresh data">
+      <i class="ti ti-refresh"></i>
     </button>
   </div>
 
@@ -414,6 +466,16 @@
   </div>
 
 </div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Auto-Refresh Indicator -->
+<div class="refresh-indicator active" id="refreshIndicator">
+  <div class="pulse-dot"></div>
+  <span>Auto-sync active</span>
+</div>
+
 <script>
   /* THEME */
   const saved = localStorage.getItem("gfs-theme") || "light";
@@ -431,12 +493,172 @@
     applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
   }
 
+  /* MANUAL REFRESH */
+  async function manualRefresh() {
+    const btn = event?.target?.closest('button');
+    if (btn) {
+      const icon = btn.querySelector('i');
+      icon.style.animation = 'spin 0.5s linear';
+      setTimeout(() => icon.style.animation = '', 500);
+    }
+    await fetchDataFromSheets();
+    showToast("Data refreshed successfully", "success", 2000);
+  }
+
+  /* TOAST NOTIFICATIONS */
+  function showToast(message, type = "info", duration = 5000) {
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: "ti-circle-check",
+      error: "ti-alert-circle",
+      warning: "ti-alert-triangle",
+      info: "ti-info-circle"
+    };
+    
+    toast.innerHTML = `
+      <i class="ti ${icons[type]} toast-icon"></i>
+      <div class="toast-content">${message}</div>
+      <i class="ti ti-x toast-close" onclick="this.parentElement.remove()"></i>
+    `;
+    
+    container.appendChild(toast);
+    
+    if (duration > 0) {
+      setTimeout(() => {
+        toast.classList.add("removing");
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+  }
+
   /* DATA */
   const API_URL = "https://script.google.com/macros/s/AKfycbx4FUGsZwSUAI_VRkoJX5UYdHCT3UmWvDfRgUhYoVvnTRzOeT_f5h8ZKmkzM2-iFBKDKA/exec";
   let students = [], groups = [], assignedStudents = new Set(), editingGroupIndex = -1;
   const selects = Array.from(document.querySelectorAll(".memberSelect"));
+  let lastDataHash = ""; // Track data changes
+  let autoRefreshInterval = null;
+  const REFRESH_INTERVAL = 10000; // Check every 10 seconds
 
   function setLoading(on) { document.getElementById("loader").classList.toggle("hidden", !on); }
+
+  // Simple hash function to detect data changes
+  function hashData(data) {
+    return JSON.stringify({
+      studentCount: data.students?.length || 0,
+      groupCount: data.groups?.length || 0,
+      students: (data.students || []).map(s => `${s.Name}:${s.Assigned}`).join(','),
+      groups: (data.groups || []).map(g => `${g.GroupNumber}:${g.Member1}:${g.Member2}:${g.Member3}:${g.Member4}`).join(',')
+    });
+  }
+
+  // Check for updates without showing loader (silent refresh)
+  async function checkForUpdates() {
+    try {
+      const data = await fetch(API_URL + "?_t=" + Date.now()).then(r => r.json());
+      if (!data.success) return;
+      
+      const newHash = hashData(data);
+      
+      // If data changed and user is not actively editing
+      if (newHash !== lastDataHash && editingGroupIndex === -1) {
+        lastDataHash = newHash;
+        
+        // Update data silently
+        students = (data.students || []).map(s => ({
+          name: s.Name||s.name||"", 
+          category: s.Category||s.category||"",
+          assigned: s.Assigned === true || s.Assigned === "TRUE" || String(s.Assigned||"false").toLowerCase() === "true"
+        }));
+        groups = (data.groups || []).map((g, i) => {
+          const members = (g.members || [g.Member1||g["Member 1"]||"",g.Member2||g["Member 2"]||"",g.Member3||g["Member 3"]||"",g.Member4||g["Member 4"]||""]).filter(Boolean);
+          const aCount = parseInt(g.ACount||g["A Count"]||g.aCount||0,10);
+          const bCount = parseInt(g.BCount||g["B Count"]||g.bCount||0,10);
+          const status = g.Status||g.status||(members.length===4&&aCount===2&&bCount===2?"Complete":"Incomplete");
+          return { groupNumber: parseInt(g.GroupNumber||g["Group Number"]||g.groupNumber||(i+1),10), members, aCount, bCount, status };
+        });
+        assignedStudents.clear();
+        students.forEach(s => { if (s.assigned) assignedStudents.add(s.name); });
+        groups.forEach(g => g.members.forEach(m => assignedStudents.add(m)));
+        
+        // Update UI
+        populateDropdowns(); 
+        renderGroups(); 
+        updateStats();
+        
+        // Show subtle notification
+        showToast("Data updated - changes detected from another user", "info", 3000);
+      }
+    } catch (err) {
+      console.error("Auto-refresh failed:", err);
+      // Don't show error toast for background checks
+    }
+  }
+
+  // Start auto-refresh
+  function startAutoRefresh() {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval = setInterval(checkForUpdates, REFRESH_INTERVAL);
+    // Update indicator
+    const indicator = document.getElementById("refreshIndicator");
+    if (indicator) {
+      indicator.className = "refresh-indicator active";
+      indicator.querySelector("span").textContent = "Auto-sync active";
+    }
+  }
+
+  // Stop auto-refresh (e.g., when page is hidden)
+  function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+    // Update indicator
+    const indicator = document.getElementById("refreshIndicator");
+    if (indicator) {
+      indicator.className = "refresh-indicator paused";
+      indicator.querySelector("span").textContent = "Auto-sync paused";
+    }
+  }
+
+  // Pause auto-refresh when page is hidden, resume when visible
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopAutoRefresh();
+    } else {
+      startAutoRefresh();
+      checkForUpdates(); // Check immediately when page becomes visible
+    }
+  });
+
+  // Stop auto-refresh when user starts editing (to avoid conflicts)
+  function editGroup(index) {
+    stopAutoRefresh(); // Pause during edit
+    const group = groups[index];
+    editingGroupIndex = index;
+    document.getElementById("formTitle").textContent = "Edit group #" + group.groupNumber;
+    document.getElementById("saveBtnLabel").textContent = "Update group";
+    document.getElementById("saveBtn").className = "btn btn-save-edit";
+    document.getElementById("cancelBtn").classList.remove("hidden");
+    populateDropdowns(group.members);
+    selects.forEach((s, i) => s.value = group.members[i] || "");
+    validateSelection();
+    document.querySelector(".form-card").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function cancelEdit() {
+    editingGroupIndex = -1;
+    document.getElementById("formTitle").textContent = "Create group";
+    document.getElementById("saveBtnLabel").textContent = "Save group";
+    document.getElementById("saveBtn").className = "btn btn-primary";
+    document.getElementById("cancelBtn").classList.add("hidden");
+    selects.forEach(s => s.value = "");
+    populateDropdowns(); 
+    validateSelection();
+    startAutoRefresh(); // Resume auto-refresh after edit
+  }
 
   function populateDropdowns(editingMembers = []) {
     selects.forEach(sel => {
@@ -488,65 +710,69 @@
 
   async function saveGroup() {
     const members = selects.map(s => s.value).filter(Boolean);
-    if (members.length < 2) { alert("Select at least 2 members."); return; }
-    if (new Set(members).size !== members.length) { alert("Duplicate members selected."); return; }
-    if (!validateSelection()) { alert("Invalid group composition."); return; }
+    if (members.length < 2) { 
+      showToast("Please select at least 2 members to create a group.", "warning");
+      return; 
+    }
+    if (new Set(members).size !== members.length) { 
+      showToast("You cannot add the same student multiple times. Please select different students.", "error");
+      return; 
+    }
+    if (!validateSelection()) { 
+      showToast("Invalid group composition. Please check the requirements.", "error");
+      return; 
+    }
     let a = 0, b = 0;
     members.forEach(n => { const s = students.find(x => x.name === n); if (s?.category === "A") a++; else b++; });
     const isComplete = members.length === 4 && a === 2 && b === 2;
     setLoading(true);
+    
     if (editingGroupIndex >= 0) {
       const group = groups[editingGroupIndex];
-      const oldMembers = [...group.members]; // Store old members
+      const oldMembers = [...group.members];
       try {
         const p = new URLSearchParams({ action:"editGroup", groupNumber: group.groupNumber.toString(), members: members.join(","), _t: Date.now() });
         const data = await fetch(API_URL + "?" + p).then(r => r.json());
-        if (data.students && !data.message) { alert("Backend outdated."); setLoading(false); return; }
-        if (!data.success) { alert("Edit failed: " + data.message); setLoading(false); return; }
-      } catch { alert("Network error."); setLoading(false); return; }
-      // Update local state: remove old members from assigned set
-      oldMembers.forEach(n => assignedStudents.delete(n));
-      // Update group object
-      Object.assign(group, { members, aCount: a, bCount: b, status: isComplete ? "Complete" : "Incomplete" });
-      // Add new members to assigned set
-      members.forEach(n => assignedStudents.add(n));
+        if (data.students && !data.message) { 
+          showToast("Backend version mismatch. Please refresh the page.", "error");
+          setLoading(false); 
+          return; 
+        }
+        if (!data.success) { 
+          showToast(data.message || "Failed to update group. Please try again.", "error");
+          setLoading(false); 
+          return; 
+        }
+        showToast(`Group #${group.groupNumber} updated successfully!`, "success");
+      } catch (err) { 
+        showToast("Network error. Please check your connection and try again.", "error");
+        setLoading(false); 
+        return; 
+      }
+      // Refresh data from server to ensure consistency
+      await fetchDataFromSheets();
       cancelEdit();
     } else {
-      const newGroup = { groupNumber: groups.length + 1, members, aCount: a, bCount: b, status: isComplete ? "Complete" : "Incomplete" };
       try {
         const p = new URLSearchParams({ action:"createGroup", members: members.join(","), _t: Date.now() });
         const data = await fetch(API_URL + "?" + p).then(r => r.json());
-        if (!data.success) { alert("Error: " + data.message); setLoading(false); return; }
-        newGroup.groupNumber = data.groupNumber || newGroup.groupNumber;
-      } catch { alert("Network error."); setLoading(false); return; }
-      groups.push(newGroup);
-      members.forEach(n => assignedStudents.add(n));
-      selects.forEach(s => s.value = ""); validateSelection();
+        if (!data.success) { 
+          showToast(data.message || "Failed to create group. Please try again.", "error");
+          setLoading(false); 
+          return; 
+        }
+        showToast(`Group #${data.groupNumber} created successfully!`, "success");
+      } catch (err) { 
+        showToast("Network error. Please check your connection and try again.", "error");
+        setLoading(false); 
+        return; 
+      }
+      // Refresh data from server to ensure consistency
+      await fetchDataFromSheets();
+      selects.forEach(s => s.value = ""); 
+      validateSelection();
     }
-    setLoading(false); renderGroups(); updateStats(); populateDropdowns();
-  }
-
-  function editGroup(index) {
-    const group = groups[index];
-    editingGroupIndex = index;
-    document.getElementById("formTitle").textContent = "Edit group #" + group.groupNumber;
-    document.getElementById("saveBtnLabel").textContent = "Update group";
-    document.getElementById("saveBtn").className = "btn btn-save-edit";
-    document.getElementById("cancelBtn").classList.remove("hidden");
-    populateDropdowns(group.members);
-    selects.forEach((s, i) => s.value = group.members[i] || "");
-    validateSelection();
-    document.querySelector(".form-card").scrollIntoView({ behavior:"smooth", block:"start" });
-  }
-
-  function cancelEdit() {
-    editingGroupIndex = -1;
-    document.getElementById("formTitle").textContent = "Create group";
-    document.getElementById("saveBtnLabel").textContent = "Save group";
-    document.getElementById("saveBtn").className = "btn btn-primary";
-    document.getElementById("cancelBtn").classList.add("hidden");
-    selects.forEach(s => s.value = "");
-    populateDropdowns(); validateSelection();
+    setLoading(false);
   }
 
   async function deleteGroup(index) {
@@ -556,14 +782,27 @@
     try {
       const p = new URLSearchParams({ action:"deleteGroup", groupNumber: group.groupNumber.toString(), _t: Date.now() });
       const data = await fetch(API_URL + "?" + p).then(r => r.json());
-      if (data.students && !data.message) { alert("Backend outdated."); setLoading(false); return; }
-      if (!data.success) { alert("Delete failed: " + data.message); setLoading(false); return; }
-    } catch { alert("Network error."); setLoading(false); return; }
-    group.members.forEach(n => assignedStudents.delete(n));
-    groups.splice(index, 1);
+      if (data.students && !data.message) { 
+        showToast("Backend version mismatch. Please refresh the page.", "error");
+        setLoading(false); 
+        return; 
+      }
+      if (!data.success) { 
+        showToast(data.message || "Failed to delete group. Please try again.", "error");
+        setLoading(false); 
+        return; 
+      }
+      showToast(`Group #${group.groupNumber} deleted successfully.`, "success");
+    } catch (err) { 
+      showToast("Network error. Please check your connection and try again.", "error");
+      setLoading(false); 
+      return; 
+    }
+    // Refresh data from server to ensure consistency
+    await fetchDataFromSheets();
     if (editingGroupIndex === index) cancelEdit();
     else if (editingGroupIndex > index) editingGroupIndex--;
-    setLoading(false); renderGroups(); updateStats(); populateDropdowns();
+    setLoading(false);
   }
 
   const gcCls = ["gc-0","gc-1","gc-2","gc-3","gc-4","gc-5"];
@@ -629,7 +868,16 @@
     setLoading(true);
     try {
       const data = await fetch(API_URL + "?_t=" + Date.now()).then(r => r.json());
-      if (!data.success) { console.error("API Error:", data.message); setLoading(false); return; }
+      if (!data.success) { 
+        console.error("API Error:", data.message); 
+        showToast("Failed to load data from server. Please refresh the page.", "error");
+        setLoading(false); 
+        return; 
+      }
+      
+      // Update hash for change detection
+      lastDataHash = hashData(data);
+      
       students = (data.students || []).map(s => ({
         name: s.Name||s.name||"", 
         category: s.Category||s.category||"",
@@ -646,10 +894,17 @@
       students.forEach(s => { if (s.assigned) assignedStudents.add(s.name); });
       groups.forEach(g => g.members.forEach(m => assignedStudents.add(m)));
       populateDropdowns(); renderGroups(); updateStats();
-    } catch (err) { console.error("Fetch failed:", err); }
+    } catch (err) { 
+      console.error("Fetch failed:", err); 
+      showToast("Network error. Please check your connection.", "error");
+    }
     setLoading(false);
   }
-  fetchDataFromSheets();
+  
+  // Initial load and start auto-refresh
+  fetchDataFromSheets().then(() => {
+    startAutoRefresh();
+  });
 </script>
 </body>
 </html>
