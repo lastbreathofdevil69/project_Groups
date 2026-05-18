@@ -8,6 +8,22 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Smooth scrolling */
+    html { scroll-behavior: smooth; }
+
+    /* Better focus visibility for accessibility */
+    *:focus-visible {
+      outline: 2px solid var(--p-lavender-tx);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* Selection color */
+    ::selection {
+      background: var(--p-lavender-bg);
+      color: var(--p-lavender-tx);
+    }
+
     /* ── LIGHT THEME ─────────────────────────────── */
     [data-theme="light"] {
       --bg:        #f5f3ff;
@@ -115,11 +131,22 @@
     @media(max-width:340px){ .stats { grid-template-columns: 1fr; } }
     .stat-card {
       border-radius: 14px; padding: 1rem 1.2rem;
-      border: 1px solid; transition: transform 0.15s;
+      border: 1px solid; transition: all 0.3s ease;
+      cursor: default;
     }
-    .stat-card:hover { transform: translateY(-2px); }
-    .stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; opacity: 0.8; }
-    .stat-value { font-size: 34px; font-weight: 700; margin-top: 4px; line-height: 1; }
+    .stat-card:hover { 
+      transform: translateY(-3px) scale(1.02); 
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .stat-label { 
+      font-size: 11px; font-weight: 700; letter-spacing: 0.05em; 
+      text-transform: uppercase; display: flex; align-items: center; 
+      gap: 5px; opacity: 0.8; 
+    }
+    .stat-value { 
+      font-size: 34px; font-weight: 700; margin-top: 4px; line-height: 1;
+      font-variant-numeric: tabular-nums; /* Better number alignment */
+    }
     .sc-total    { background: var(--p-lavender-bg); border-color: var(--p-lavender-br); color: var(--p-lavender-tx); }
     .sc-complete { background: var(--p-sage-bg);     border-color: var(--p-sage-br);     color: var(--p-sage-tx); }
     .sc-partial  { background: var(--p-lemon-bg);    border-color: var(--p-lemon-br);    color: var(--p-lemon-tx); }
@@ -142,15 +169,26 @@
       font-family: inherit; font-size: 13px; font-weight: 600;
       cursor: pointer; border-radius: 10px; padding: 0.5rem 1.1rem;
       display: inline-flex; align-items: center; gap: 6px;
-      transition: opacity 0.15s, transform 0.1s; white-space: nowrap; border: 1px solid;
+      transition: all 0.2s ease; white-space: nowrap; border: 1px solid;
+      position: relative; overflow: hidden;
     }
-    .btn:hover { opacity: 0.84; }
-    .btn:active { transform: scale(0.97); }
+    .btn::before {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      width: 0; height: 0; border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    .btn:hover::before { width: 300px; height: 300px; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .btn:active { transform: translateY(0) scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary     { background: var(--p-lavender-bg); color: var(--p-lavender-tx); border-color: var(--p-lavender-br); }
     .btn-save-edit   { background: var(--p-mint-bg);     color: var(--p-mint-tx);     border-color: var(--p-mint-br); }
     .btn-cancel      { background: var(--surface-2);     color: var(--text-2);         border-color: var(--border-md); }
     .btn-edit        { background: var(--p-sky-bg);      color: var(--p-sky-tx);       border-color: var(--p-sky-br); }
     .btn-delete      { background: var(--p-coral-bg);    color: var(--p-coral-tx);     border-color: var(--p-coral-br); }
+    .btn-delete:hover { background: var(--p-rose-bg); border-color: var(--p-rose-br); }
     .hidden { display: none !important; }
 
     /* FIELDS */
@@ -271,8 +309,24 @@
     .action-row .btn { padding: 0.3rem 0.75rem; font-size: 11px; }
 
     .empty-state { padding: 3rem 1rem; text-align: center; color: var(--text-3); }
-    .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--p-lavender-br); }
-    .empty-state p { font-size: 13px; }
+    .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; color: var(--p-lavender-br); opacity: 0.6; }
+    .empty-state p { font-size: 14px; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+    .empty-state .empty-hint { font-size: 12px; opacity: 0.7; margin-top: 8px; }
+
+    /* SKELETON LOADING */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer-skeleton 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer-skeleton {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton-stat { height: 80px; }
+    .skeleton-form { height: 300px; }
+    .skeleton-table { height: 200px; }
 
     /* TOAST NOTIFICATIONS */
     .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 400px; }
@@ -333,14 +387,69 @@
       to { transform: rotate(360deg); }
     }
 
+    /* SCROLL TO TOP BUTTON */
+    .scroll-top {
+      position: fixed; bottom: 20px; right: 20px; z-index: 9998;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--p-lavender-bg); color: var(--p-lavender-tx);
+      border: 1px solid var(--p-lavender-br);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .scroll-top.visible { opacity: 1; visibility: visible; }
+    .scroll-top:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    .scroll-top i { font-size: 20px; }
+
     @media(max-width:600px){
       body { padding: 1rem 0.75rem 2rem; }
       .header { border-radius: 14px; padding: 1rem 1.1rem; }
+      .header h1 { font-size: 17px; }
+      .header p { font-size: 12px; }
+      .header-icon { width: 40px; height: 40px; }
+      .header-icon i { font-size: 20px; }
+      .theme-btn { padding: 0.4rem 0.75rem; font-size: 12px; }
+      .theme-btn span { display: none; } /* Hide text on mobile, keep icon */
       .form-card, .groups-card { border-radius: 14px; }
       .avail-card { border-radius: 12px; }
       .member-grid { grid-template-columns: 1fr 1fr; }
+      .stat-value { font-size: 28px; }
+      .stat-label { font-size: 10px; }
+      .form-header { flex-direction: column; align-items: stretch; }
+      .btn-row { width: 100%; }
+      .btn-row .btn { flex: 1; justify-content: center; }
+      /* Make table more mobile-friendly */
+      .table-wrap { margin: 0 -1rem; }
+      table { font-size: 12px; }
+      th, td { padding: 0.5rem 0.6rem; }
+      .action-row { flex-direction: column; gap: 4px; }
+      .action-row .btn { width: 100%; justify-content: center; }
+      /* Toast adjustments */
+      .toast-container { top: 10px; right: 10px; left: 10px; max-width: none; }
+      .toast { min-width: auto; }
+      /* Refresh indicator */
+      .refresh-indicator { bottom: 10px; left: 10px; font-size: 11px; padding: 0.4rem 0.7rem; }
+      .refresh-indicator span { display: none; } /* Show only dot on mobile */
+      /* Scroll to top button */
+      .scroll-top { width: 44px; height: 44px; bottom: 70px; right: 10px; }
+      .scroll-top i { font-size: 18px; }
     }
-    @media(max-width:380px){ .member-grid { grid-template-columns: 1fr; } }
+    @media(max-width:380px){ 
+      .member-grid { grid-template-columns: 1fr; }
+      .stats { gap: 8px; }
+      .stat-card { padding: 0.8rem 1rem; }
+    }
+    /* Tablet optimizations */
+    @media(min-width:641px) and (max-width:960px){
+      .page { max-width: 100%; padding: 0 1.5rem; }
+      .stats { grid-template-columns: repeat(2,1fr); }
+    }
+    /* Large screen optimizations */
+    @media(min-width:1200px){
+      .page { max-width: 1140px; }
+      .stats { grid-template-columns: repeat(4,1fr); }
+    }
   </style>
 </head>
 <body>
@@ -446,7 +555,24 @@
   <div class="groups-card">
     <div class="groups-header">
       <div class="groups-header-left"><i class="ti ti-table" aria-hidden="true"></i> Created groups</div>
-      <span class="groups-badge" id="groupsBadge">0</span>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <input 
+          type="text" 
+          id="searchGroups" 
+          placeholder="Search groups..." 
+          style="
+            padding: 0.4rem 0.8rem; 
+            border-radius: 8px; 
+            border: 1px solid var(--border-md); 
+            background: var(--surface); 
+            color: var(--text); 
+            font-size: 12px;
+            min-width: 150px;
+          "
+          oninput="filterGroups(this.value)"
+        />
+        <span class="groups-badge" id="groupsBadge">0</span>
+      </div>
     </div>
     <div class="table-wrap">
       <table>
@@ -476,6 +602,11 @@
   <span>Auto-sync active</span>
 </div>
 
+<!-- Scroll to Top Button -->
+<button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()" aria-label="Scroll to top">
+  <i class="ti ti-arrow-up"></i>
+</button>
+
 <script>
   /* THEME */
   const saved = localStorage.getItem("gfs-theme") || "light";
@@ -504,6 +635,21 @@
     await fetchDataFromSheets();
     showToast("Data refreshed successfully", "success", 2000);
   }
+
+  /* SCROLL TO TOP */
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Show/hide scroll to top button
+  window.addEventListener('scroll', () => {
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    if (window.scrollY > 300) {
+      scrollBtn.classList.add('visible');
+    } else {
+      scrollBtn.classList.remove('visible');
+    }
+  });
 
   /* TOAST NOTIFICATIONS */
   function showToast(message, type = "info", duration = 5000) {
@@ -807,12 +953,50 @@
 
   const gcCls = ["gc-0","gc-1","gc-2","gc-3","gc-4","gc-5"];
 
+  function filterGroups(searchTerm) {
+    const rows = document.querySelectorAll("#groupsTable tr");
+    const term = searchTerm.toLowerCase().trim();
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+      if (row.querySelector(".empty-state")) return; // Skip empty state row
+      
+      const text = row.textContent.toLowerCase();
+      const isVisible = text.includes(term);
+      row.style.display = isVisible ? "" : "none";
+      if (isVisible) visibleCount++;
+    });
+    
+    // Show "no results" if search has no matches
+    if (visibleCount === 0 && groups.length > 0) {
+      const tbody = document.getElementById("groupsTable");
+      const existingEmpty = tbody.querySelector(".search-empty");
+      if (!existingEmpty) {
+        const tr = document.createElement("tr");
+        tr.className = "search-empty";
+        tr.innerHTML = `<td colspan="6"><div class="empty-state">
+          <i class="ti ti-search-off" aria-hidden="true"></i>
+          <p>No groups match "${searchTerm}"</p>
+          <p class="empty-hint">Try a different search term</p>
+        </div></td>`;
+        tbody.appendChild(tr);
+      }
+    } else {
+      const existingEmpty = document.querySelector(".search-empty");
+      if (existingEmpty) existingEmpty.remove();
+    }
+  }
+
   function renderGroups() {
     const tbody = document.getElementById("groupsTable");
     document.getElementById("groupsBadge").textContent = groups.length;
     tbody.innerHTML = "";
     if (!groups.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="ti ti-mood-happy"></i><p>No groups yet — create your first group above</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <i class="ti ti-users-group" aria-hidden="true"></i>
+        <p>No groups created yet</p>
+        <p class="empty-hint">Create your first group using the form above</p>
+      </div></td></tr>`;
       return;
     }
     groups.forEach((group, index) => {
