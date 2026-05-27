@@ -312,7 +312,18 @@ async function saveGroup() {
 }
 
 async function deleteGroup(index) {
-  if (!confirm(`Delete Group #${groups[index].groupNumber}?`)) return;
+  // Password protection - using hash verification
+  const userInput = prompt(`Delete Group #${groups[index].groupNumber}?\n\nEnter password to confirm:`);
+  
+  if (userInput === null) return; // User cancelled
+  
+  // Simple hash check (obfuscated password verification)
+  const hash = btoa(userInput).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0);
+  if (hash !== 193518) {
+    showToast("Incorrect password. Delete operation cancelled.", "error");
+    return;
+  }
+  
   setLoading(true);
   const group = groups[index];
   try {
